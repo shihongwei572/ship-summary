@@ -196,6 +196,7 @@ const ExportDocx = (function() {
 
     /* ═══════ 生成 ═══════ */
     const doc = new Document({
+      features: { updateFields: true },
       styles: {
         default: { document: { run: { font: F.BODY, size: SZ.BODY } } },
         paragraphStyles: [{
