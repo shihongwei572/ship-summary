@@ -266,7 +266,8 @@ html, body {
   position: absolute;
   inset: 0;
   opacity: 0;
-  cursor: pointer;
+  pointer-events: none;
+  cursor: default;
 }
 .upload-preview {
   display: flex;

@@ -157,6 +157,7 @@ const FormRenderer = (function() {
 
   function makeUploadZone(path, multiple, accept) {
     const container = document.createElement('div');
+    container.className = 'upload-container';
 
     const zone = document.createElement('div');
     zone.className = 'upload-zone';
@@ -173,9 +174,6 @@ const FormRenderer = (function() {
     input.type = 'file';
     input.accept = accept || 'image/*,.pdf';
     if (multiple) input.multiple = true;
-
-    // 关键修复：阻止 input 点击事件冒泡到 zone
-    input.addEventListener('click', (e) => { e.stopPropagation(); });
 
     const previewContainer = document.createElement('div');
     previewContainer.className = 'upload-preview';
@@ -198,46 +196,12 @@ const FormRenderer = (function() {
       input.value = '';
     });
 
-    // ── zone click → 触发 input 点击 ──
+    // ── zone click → 点击区域触发文件选择 ──
     zone.addEventListener('click', () => {
       input.click();
     });
 
-    // ── Ctrl+V paste ──
-    function handlePaste(e) {
-      if (!container.contains(document.activeElement)) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type.startsWith('image/')) {
-          e.preventDefault();
-          const blob = item.getAsFile();
-          if (!blob) continue;
-          const ext = item.type.split('/')[1] || 'png';
-          const name = 'paste-' + Date.now() + '.' + ext;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const fileData = { name, size: blob.size, type: item.type, dataURL: ev.target.result };
-            if (multiple) {
-              const arr = FormState.getState(path) || [];
-              const newArr = Array.isArray(arr) ? [...arr, fileData] : [fileData];
-              FormState.set(path, newArr);
-              addFilePreview(previewContainer, fileData, path, newArr.length - 1, true);
-            } else {
-              FormState.set(path, fileData);
-              previewContainer.innerHTML = '';
-              addFilePreview(previewContainer, fileData, path, -1, false);
-            }
-          };
-          reader.readAsDataURL(blob);
-          return;
-        }
-      }
-    }
-
-    zone.addEventListener('paste', handlePaste);
-
-    // Drag & drop
+    // ── Drag & drop ──
     zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
     zone.addEventListener('dragleave', () => { zone.classList.remove('drag-over'); });
     zone.addEventListener('drop', (e) => {
@@ -253,6 +217,36 @@ const FormRenderer = (function() {
     zone.appendChild(input);
     container.appendChild(zone);
     container.appendChild(previewContainer);
+
+    // ── Ctrl+V support: track last hovered zone ──
+    zone.addEventListener('mouseenter', () => {
+      container.classList.add('upload-active');
+    });
+    zone.addEventListener('mouseleave', () => {
+      container.classList.remove('upload-active');
+    });
+
+    // Store on container for document-level listener
+    container._pasteHandler = function(blob, type) {
+      const ext = type.split('/')[1] || 'png';
+      const name = 'paste-' + Date.now() + '.' + ext;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const fileData = { name, size: blob.size, type, dataURL: ev.target.result };
+        if (multiple) {
+          const arr = FormState.getState(path) || [];
+          const newArr = Array.isArray(arr) ? [...arr, fileData] : [fileData];
+          FormState.set(path, newArr);
+          addFilePreview(previewContainer, fileData, path, newArr.length - 1, true);
+        } else {
+          FormState.set(path, fileData);
+          previewContainer.innerHTML = '';
+          addFilePreview(previewContainer, fileData, path, -1, false);
+        }
+      };
+      reader.readAsDataURL(blob);
+    };
+
     return container;
   }
 
@@ -1082,28 +1076,46 @@ const FormRenderer = (function() {
 
   // ── Image lightbox ──
   function showImageLightbox(dataURL, name) {
+    // Remove any existing lightbox first
+    const existing = document.querySelector('.lightbox-overlay');
+    if (existing) existing.remove();
+
     const overlay = document.createElement('div');
     overlay.className = 'lightbox-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', '图片预览');
 
     const box = document.createElement('div');
     box.className = 'lightbox-box';
 
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'lightbox-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.setAttribute('aria-label', '关闭');
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      overlay.remove();
+    });
+
     const img = document.createElement('img');
     img.src = dataURL;
     img.className = 'lightbox-img';
+    img.alt = name || '预览图片';
 
     const caption = document.createElement('div');
     caption.className = 'lightbox-caption';
     caption.textContent = name || '';
 
-    const closeBtn = document.createElement('span');
-    closeBtn.className = 'lightbox-close';
-    closeBtn.innerHTML = '&times;';
-    closeBtn.addEventListener('click', () => overlay.remove());
-
+    // Close on background click
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) overlay.remove();
     });
+
+    // Close on Escape key
+    const escHandler = (e) => {
+      if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); }
+    };
+    document.addEventListener('keydown', escHandler);
 
     box.appendChild(closeBtn);
     box.appendChild(img);
@@ -1111,6 +1123,27 @@ const FormRenderer = (function() {
     overlay.appendChild(box);
     document.body.appendChild(overlay);
   }
+
+  // ── Global Ctrl+V paste handler ──
+  document.addEventListener('paste', (e) => {
+    // Find which upload zone the mouse is currently over
+    const hovered = document.querySelector('.upload-zone:hover');
+    if (!hovered) return;
+
+    const container = hovered.closest('.upload-container') || hovered.parentElement;
+    if (!container || !container._pasteHandler) return;
+
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const blob = item.getAsFile();
+        if (blob) container._pasteHandler(blob, item.type);
+        return;
+      }
+    }
+  });
 
   // ── Public API ──────────────────────────────────────────
   return {
