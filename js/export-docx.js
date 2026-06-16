@@ -65,7 +65,7 @@ const ExportDocx = (function() {
 
   async function generateAndDownload() {
     const D = docx;
-    const { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, TabStopType, PageBreak } = D;
+    const { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, PageBreak } = D;
     const s = FormState.getState(), m = s.meta;
     const ship = v(m.shipName) + '/' + v(m.voyage);
 
@@ -90,7 +90,7 @@ const ExportDocx = (function() {
     /* ═══════════════ 目录 ═══════════════ */
     C.push(new Paragraph({ children: [new PageBreak()] }));
     C.push(new Paragraph({ children: [new TextRun({ text: '目录', font: F.TOC, size: HP.TOC_H })], alignment: AlignmentType.CENTER, spacing: { after: 360, line: 400 } }));
-    const RIGHT_TAB = { type: TabStopType.RIGHT, position: 9026 };
+    const RIGHT_TAB = { type: 'right', position: 9026 };
     [
       ['一、到港前船舶情况', '3'], ['二、码头计划仓库情况', '4'], ['三、船靠泊卸货前情况', '5'],
       ['四、船舶从卸货到结束情况', '6'], ['五、提货情况', '8'], ['六、成本分析', '10'], ['七、整船总结', '10']
