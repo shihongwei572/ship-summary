@@ -10,9 +10,20 @@ Desktop.ini
 docx_content.txt
 doc_content.txt
 doc_text_output.txt
+para_dump.txt
+sig_dump.txt
+sig_dump2.txt
 
 # Verification screenshots
 verification_*.png
+
+# Extracted template images (only keep img/cofco-logo.png)
+image*.png
+image*.jpeg
+image*.jpg
+img/image2.png
+img/image3.png
+img/cofco-logo-small.png
 
 # IDE
 .vscode/
