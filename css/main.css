@@ -299,7 +299,7 @@ html, body {
 }
 .upload-file-info .remove-btn:hover { color: #c0392b; }
 
-/* === Preview Panel (Right) — mimics Word document appearance === */
+/* === Preview Panel (Right) — matches Word template fonts === */
 .preview-panel {
   width: 45%;
   min-width: 350px;
@@ -316,89 +316,64 @@ html, body {
   margin: 0 auto;
   box-shadow: var(--shadow);
   padding: 50px 60px;
-  font-family: "SimSun", "STSong", serif;
+  font-family: "DengXian", "SimSun", serif;
   font-size: 11pt;
   line-height: 1.8;
   color: #000;
   min-height: 100%;
 }
 
-/* Cover */
-.doc-cover {
-  margin-bottom: 40px;
-}
-.cover-attach {
-  font-family: var(--font-cn);
-  font-size: 11pt;
-  text-align: center;
-  margin-bottom: 8px;
-}
-.cover-title-large {
-  font-family: "Microsoft YaHei", "SimHei", sans-serif;
-  font-size: 36pt;
-  font-weight: 700;
-}
-.cover-spacing {
-  margin-bottom: 30px;
-}
-.cover-ship-name {
-  font-family: "Microsoft YaHei", "SimHei", sans-serif;
-  font-size: 28pt;
-  margin-bottom: 4px;
-}
-.cover-dept {
-  font-family: "Microsoft YaHei", "SimHei", sans-serif;
-  font-size: 24pt;
-  font-weight: 700;
-  margin-top: 30px;
-}
-.cover-date {
-  font-family: "Microsoft YaHei", "SimHei", sans-serif;
-  font-size: 24pt;
-  font-weight: 700;
-}
+/* Cover — matches template */
+.doc-cover { margin-bottom: 40px; }
+.cv-attach { font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:14pt; margin-bottom:8px; }
+.cv-title { font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:36pt; font-weight:700; }
+.cv-title-j { margin-bottom:20px; }
+.cv-logo { text-align:center; margin:10px 0; }
+.cv-ship { font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:28pt; }
+.cv-ship-b { font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:36pt; font-weight:700; }
+.cv-dept { font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:24pt; font-weight:700; margin-top:30px; }
+.cv-date { font-family:"Microsoft YaHei","SimHei",sans-serif; font-size:24pt; font-weight:700; }
 
-/* TOC */
-.doc-toc {
-  margin-bottom: 40px;
-  page-break-before: always;
-}
-.toc-title {
-  font-family: "SimHei", "STHeiti", sans-serif;
-  font-size: 28pt;
-  text-align: center;
-  margin-bottom: 24px;
-}
-.toc-list { margin-left: 0; }
-.toc-item {
-  font-family: "SimHei", "STHeiti", sans-serif;
-  font-size: 22pt;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-.toc-item.toc-sub {
-  font-size: 20pt;
-  font-weight: 400;
-}
+/* TOC — 仿宋 font, centered title, right-aligned page numbers */
+.doc-toc { margin-bottom:40px; page-break-before:always; }
+.toc-title { font-family:"FangSong","STFangsong",serif; font-size:28pt; text-align:center; margin-bottom:24px; }
+.toc-list { margin-left:0; }
+.toc-item { font-family:"FangSong","STFangsong",serif; font-size:20pt; margin-bottom:6px; display:flex; justify-content:space-between; }
+.toc-item.toc-l1 { font-size:22pt; font-weight:700; }
+.toc-pg { font-family:"FangSong","STFangsong",serif; }
 
-/* Section headings */
-.doc-sec-heading {
-  font-family: "SimHei", "STHeiti", sans-serif;
-  font-size: 16pt;
-  font-weight: 700;
-  margin-top: 28px;
-  margin-bottom: 14px;
-}
+/* Section headings — 等线 16pt bold */
+.doc-sec-heading { font-family:"DengXian","SimHei",sans-serif; font-size:16pt; font-weight:700; margin-top:28px; margin-bottom:14px; }
 
-/* Body text */
-.doc-p {
-  font-family: "SimSun", "STSong", serif;
-  font-size: 11pt;
-  line-height: 1.8;
-  margin-bottom: 6px;
-  text-indent: 0;
-}
-.doc-p b {
+/* Body — 等线 11pt */
+.doc-p { font-family:"DengXian","SimSun",serif; font-size:11pt; line-height:1.8; margin-bottom:6px; }
+.doc-p b { font-family:"DengXian","SimSun",serif; font-weight:700; }
+
+/* Checkbox */
+.chk { font-family:"DengXian","SimSun",serif; font-size:11pt; letter-spacing:2px; }
+.gap { text-decoration:underline; padding:0 8px; color:#999; }
+
+/* Photo placeholders */
+.doc-photo { border:1px dashed #999; padding:24px 16px; text-align:center; font-family:"DengXian","SimSun",serif; font-size:10pt; color:#888; margin:8px 0 16px; background:#fafafa; }
+.doc-photo.has-file { border-style:solid; color:var(--success); background:#f0faf3; }
+.doc-inline-img { max-width:200px; max-height:150px; margin:4px; border:1px solid #ddd; }
+
+/* Signatures */
+.doc-signatures { margin-top:50px; font-family:"DengXian","SimSun",serif; font-size:12pt; line-height:2.4; }
+.sig-date { margin-top:10px; }
+
+/* Hide legacy preview classes */
+.preview-document .cover-title,
+.preview-document .cover-subtitle,
+.preview-document .cover-ship,
+.preview-document .cover-dept,
+.preview-document .cover-date,
+.preview-document .toc-title,
+.preview-document .toc-item,
+.preview-document .section-heading,
+.preview-document .field-line,
+.preview-document .checkbox-mark,
+.preview-document .photo-placeholder { display:none; }
   font-family: "SimSun", "STSong", serif;
   font-weight: 700;
 }
