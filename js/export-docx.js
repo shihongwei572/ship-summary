@@ -42,7 +42,8 @@ const ExportDocx = (function() {
 
     /* ═══════ 封面 ═══════ */
     try {
-      const resp = await fetch('img/cofco-logo.png');
+      const logoURL = new URL('img/cofco-logo.png', window.location.href).href;
+      const resp = await fetch(logoURL);
       if (resp.ok) {
         const buf = await resp.arrayBuffer();
         C.push(new Paragraph({ children: [new ImageRun({ data: new Uint8Array(buf), transformation: { width: 124, height: 60 }, type: 'png' })], alignment: AlignmentType.CENTER, spacing: { after: 240, before: 400 } }));
