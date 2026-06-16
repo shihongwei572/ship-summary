@@ -160,9 +160,12 @@ const FormRenderer = (function() {
 
     const zone = document.createElement('div');
     zone.className = 'upload-zone';
+    zone.setAttribute('tabindex', '0'); // make focusable for paste
+    zone.setAttribute('data-path', path);
+    if (multiple) zone.setAttribute('data-multiple', 'true');
     zone.innerHTML = `
       <div class="upload-icon">📎</div>
-      <div class="upload-text">点击或拖拽文件到此处上传</div>
+      <div class="upload-text">点击、拖拽或 Ctrl+V 粘贴文件到此处</div>
       <div class="upload-hint">${accept || '支持图片、PDF等文件格式'}</div>
     `;
 
@@ -227,6 +230,38 @@ const FormRenderer = (function() {
     zone.appendChild(input);
     container.appendChild(zone);
     container.appendChild(previewContainer);
+
+    // ── Ctrl+V paste support ──
+    zone.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const blob = item.getAsFile();
+          if (!blob) continue;
+          // generate a filename
+          const ext = item.type.split('/')[1] || 'png';
+          const name = 'paste-' + Date.now() + '.' + ext;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const fileData = { name, size: blob.size, type: item.type, dataURL: ev.target.result };
+            if (multiple) {
+              const arr = FormState.getState(path) || [];
+              const newArr = Array.isArray(arr) ? [...arr, fileData] : [fileData];
+              FormState.set(path, newArr);
+              addFilePreview(previewContainer, fileData, path, newArr.length - 1, true);
+            } else {
+              FormState.set(path, fileData);
+              previewContainer.innerHTML = '';
+              addFilePreview(previewContainer, fileData, path, -1, false);
+            }
+          };
+          reader.readAsDataURL(blob);
+          return;
+        }
+      }
+    });
     return container;
   }
 
@@ -238,7 +273,14 @@ const FormRenderer = (function() {
       const thumb = document.createElement('img');
       thumb.className = 'upload-thumb';
       thumb.src = fileData.dataURL;
-      thumb.style.width = '40px'; thumb.style.height = '40px';
+      thumb.style.width = '60px'; thumb.style.height = '60px';
+      thumb.style.cursor = 'pointer';
+      thumb.title = '点击放大查看';
+      // 点击缩略图 → 放大预览
+      thumb.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        showImageLightbox(fileData.dataURL, fileData.name);
+      });
       div.appendChild(thumb);
     }
 
@@ -1022,6 +1064,38 @@ const FormRenderer = (function() {
     rowSign.appendChild(saleDiv);
     fgSign.appendChild(rowSign);
     body.appendChild(fgSign);
+  }
+
+  // ── Image lightbox ──
+  function showImageLightbox(dataURL, name) {
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'lightbox-box';
+
+    const img = document.createElement('img');
+    img.src = dataURL;
+    img.className = 'lightbox-img';
+
+    const caption = document.createElement('div');
+    caption.className = 'lightbox-caption';
+    caption.textContent = name || '';
+
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'lightbox-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', () => overlay.remove());
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    box.appendChild(closeBtn);
+    box.appendChild(img);
+    box.appendChild(caption);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
   }
 
   // ── Public API ──────────────────────────────────────────
