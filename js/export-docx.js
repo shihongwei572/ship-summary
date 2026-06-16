@@ -101,8 +101,17 @@ const ExportDocx = (function() {
       alignment: AlignmentType.CENTER, spacing: { after: 400, line: 400 },
     }));
 
-    // 使用 Word 自动目录（TOC 域），打开 .docx 后右键更新域即可得到真实页码
-    // 同时保留静态条目作为兼容方案
+    // ⚠️ docx 库不支持真实的 Word TOC 域
+    // 导出后用 Word 打开 → 光标放此处 → 菜单「引用」→「目录」→「自动目录」即可生成真实页码
+    C.push(new Paragraph({
+      children: [new TextRun({
+        text: '（导出后请用 Word 插入自动目录获取真实页码）',
+        font: F.BODY, size: SZ.SMALL, italics: true, color: '999999',
+      })],
+      alignment: AlignmentType.CENTER, spacing: { after: 80 },
+    }));
+
+    // 静态目录条目（leader dots + 估算页码，供快速预览）
     const toc = [
       ['一、到港前船舶情况', '3'], ['二、码头计划仓库情况', '4'],
       ['三、船靠泊卸货前情况', '5'], ['四、船舶从卸货到结束情况', '6'],
