@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>船小结填写工具</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/print.css">
+
+<!-- External Libraries for Word Export -->
+<script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════ Toolbar ═══════════════ -->
+<div class="toolbar">
+  <span class="brand">🚢 船小结填写工具</span>
+  <button id="btn-new" title="新建空白报告">📄 新建</button>
+  <button id="btn-save" title="保存当前草稿">💾 保存草稿</button>
+  <button id="btn-load" title="加载已保存的草稿">📂 加载草稿</button>
+  <span class="spacer"></span>
+  <button id="btn-preview" title="全屏预览报告">🔍 全屏预览</button>
+  <button id="btn-export-docx" class="primary" title="导出Word文档 (.docx)">📥 导出Word</button>
+  <button id="btn-export-pdf" class="primary" title="打印或导出PDF">🖨️ 打印PDF</button>
+</div>
+
+<!-- ═══════════════ Main Layout ═══════════════ -->
+<div class="app-container">
+  <div class="form-panel" id="form-panel"></div>
+  <div class="preview-panel" id="preview-panel">
+    <div class="preview-document" id="preview-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ JS Files (order matters!) ═══════════════ -->
+<script src="js/form-state.js"></script>
+<script src="js/form-renderer.js"></script>
+<script src="js/file-upload.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/export-docx.js"></script>
+<script src="js/export-print.js"></script>
+<script src="js/validation.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

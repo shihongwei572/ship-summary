@@ -1,0 +1,22 @@
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Word template files (not for distribution)
+*.doc
+*.docx
+
+# Extracted text files
+docx_content.txt
+doc_content.txt
+doc_text_output.txt
+
+# Verification screenshots
+verification_*.png
+
+# IDE
+.vscode/
+.idea/
+
+# Node (if any)
+node_modules/
