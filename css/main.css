@@ -299,7 +299,7 @@ html, body {
 }
 .upload-file-info .remove-btn:hover { color: #c0392b; }
 
-/* === Preview Panel (Right) === */
+/* === Preview Panel (Right) — mimics Word document appearance === */
 .preview-panel {
   width: 45%;
   min-width: 350px;
@@ -316,105 +316,152 @@ html, body {
   margin: 0 auto;
   box-shadow: var(--shadow);
   padding: 50px 60px;
-  font-family: var(--font-serif);
-  font-size: 14px;
+  font-family: "SimSun", "STSong", serif;
+  font-size: 11pt;
   line-height: 1.8;
   color: #000;
   min-height: 100%;
 }
-.preview-document .cover-title {
-  text-align: center;
-  font-size: 22px;
-  font-weight: 700;
+
+/* Cover */
+.doc-cover {
+  margin-bottom: 40px;
+}
+.cover-attach {
   font-family: var(--font-cn);
+  font-size: 11pt;
+  text-align: center;
   margin-bottom: 8px;
 }
-.preview-document .cover-subtitle {
-  text-align: center;
-  font-size: 20px;
+.cover-title-large {
+  font-family: "Microsoft YaHei", "SimHei", sans-serif;
+  font-size: 36pt;
   font-weight: 700;
-  font-family: var(--font-cn);
+}
+.cover-spacing {
   margin-bottom: 30px;
 }
-.preview-document .cover-ship {
-  text-align: center;
-  font-size: 16px;
-  margin-bottom: 40px;
-}
-.preview-document .cover-dept {
-  text-align: center;
-  font-size: 15px;
-  margin-bottom: 8px;
-}
-.preview-document .cover-date {
-  text-align: center;
-  font-size: 15px;
-  margin-bottom: 40px;
-}
-.preview-document .toc-title {
-  font-size: 16px;
-  font-weight: 700;
-  font-family: var(--font-cn);
-  text-align: center;
-  margin-bottom: 16px;
-}
-.preview-document .toc-item {
-  font-size: 14px;
+.cover-ship-name {
+  font-family: "Microsoft YaHei", "SimHei", sans-serif;
+  font-size: 28pt;
   margin-bottom: 4px;
 }
-.preview-document .section-heading {
-  font-size: 16px;
+.cover-dept {
+  font-family: "Microsoft YaHei", "SimHei", sans-serif;
+  font-size: 24pt;
   font-weight: 700;
-  font-family: var(--font-cn);
   margin-top: 30px;
-  margin-bottom: 12px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #ccc;
 }
-.preview-document .field-line {
+.cover-date {
+  font-family: "Microsoft YaHei", "SimHei", sans-serif;
+  font-size: 24pt;
+  font-weight: 700;
+}
+
+/* TOC */
+.doc-toc {
+  margin-bottom: 40px;
+  page-break-before: always;
+}
+.toc-title {
+  font-family: "SimHei", "STHeiti", sans-serif;
+  font-size: 28pt;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.toc-list { margin-left: 0; }
+.toc-item {
+  font-family: "SimHei", "STHeiti", sans-serif;
+  font-size: 22pt;
+  font-weight: 700;
   margin-bottom: 6px;
 }
-.preview-document .field-line .field-label {
-  font-weight: 600;
-  font-family: var(--font-cn);
+.toc-item.toc-sub {
+  font-size: 20pt;
+  font-weight: 400;
 }
-.preview-document .field-line .field-value {
-  border-bottom: 1px solid #333;
-  padding: 0 4px;
-  min-width: 60px;
-  display: inline-block;
+
+/* Section headings */
+.doc-sec-heading {
+  font-family: "SimHei", "STHeiti", sans-serif;
+  font-size: 16pt;
+  font-weight: 700;
+  margin-top: 28px;
+  margin-bottom: 14px;
 }
-.preview-document .field-line .field-value.empty {
-  color: #ccc;
+
+/* Body text */
+.doc-p {
+  font-family: "SimSun", "STSong", serif;
+  font-size: 11pt;
+  line-height: 1.8;
+  margin-bottom: 6px;
+  text-indent: 0;
 }
-.preview-document .checkbox-mark {
-  display: inline-block;
-  width: 18px; height: 18px;
-  border: 1.5px solid #333;
-  text-align: center;
-  line-height: 18px;
-  font-size: 12px;
-  margin: 0 2px;
+.doc-p b {
+  font-family: "SimSun", "STSong", serif;
+  font-weight: 700;
 }
-.preview-document .photo-placeholder {
+
+/* Checkbox */
+.chk {
+  font-family: "SimSun", serif;
+  font-size: 11pt;
+  letter-spacing: 2px;
+}
+
+/* Underline gap for empty values */
+.gap {
+  text-decoration: underline;
+  padding: 0 8px;
+  color: #999;
+}
+
+/* Photo placeholders */
+.doc-photo {
   border: 1px dashed #999;
-  padding: 30px 20px;
+  padding: 24px 16px;
   text-align: center;
-  color: var(--text-light);
-  margin: 10px 0;
-  font-size: 13px;
+  font-family: "SimSun", serif;
+  font-size: 10pt;
+  color: #888;
+  margin: 8px 0 16px;
   background: #fafafa;
 }
-.preview-document .photo-placeholder.has-photo {
+.doc-photo.has-file {
   border-style: solid;
   color: var(--success);
-  background: #eafaf1;
+  background: #f0faf3;
 }
-.preview-document .signature-area {
-  margin-top: 40px;
+
+.doc-inline-img {
+  max-width: 200px;
+  max-height: 150px;
+  margin: 4px;
+  border: 1px solid #ddd;
 }
-.preview-document .signature-line {
-  margin-bottom: 16px;
+
+/* Signatures */
+.doc-signatures {
+  margin-top: 50px;
+  font-family: "SimSun", serif;
+  font-size: 12pt;
+  line-height: 2.4;
+}
+
+/* Hide legacy preview classes */
+.preview-document .cover-title,
+.preview-document .cover-subtitle,
+.preview-document .cover-ship,
+.preview-document .cover-dept,
+.preview-document .cover-date,
+.preview-document .toc-title,
+.preview-document .toc-item,
+.preview-document .section-heading,
+.preview-document .field-line,
+.preview-document .checkbox-mark,
+.preview-document .photo-placeholder {
+  /* overridden by new doc-* classes above */
 }
 
 /* === Toast === */
