@@ -160,7 +160,7 @@ const FormRenderer = (function() {
 
     const zone = document.createElement('div');
     zone.className = 'upload-zone';
-    zone.setAttribute('tabindex', '0'); // make focusable for paste
+    zone.setAttribute('tabindex', '0');
     zone.setAttribute('data-path', path);
     if (multiple) zone.setAttribute('data-multiple', 'true');
     zone.innerHTML = `
@@ -173,6 +173,9 @@ const FormRenderer = (function() {
     input.type = 'file';
     input.accept = accept || 'image/*,.pdf';
     if (multiple) input.multiple = true;
+
+    // 关键修复：阻止 input 点击事件冒泡到 zone
+    input.addEventListener('click', (e) => { e.stopPropagation(); });
 
     const previewContainer = document.createElement('div');
     previewContainer.className = 'upload-preview';
@@ -190,49 +193,19 @@ const FormRenderer = (function() {
     input.addEventListener('change', (e) => {
       const files = Array.from(e.target.files);
       files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const fileData = {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            dataURL: ev.target.result
-          };
-          if (multiple) {
-            const arr = FormState.getState(path) || [];
-            if (!Array.isArray(arr)) { /* convert */ }
-            const newArr = Array.isArray(arr) ? [...arr, fileData] : [fileData];
-            FormState.set(path, newArr);
-            addFilePreview(previewContainer, fileData, path, newArr.length - 1, true);
-          } else {
-            FormState.set(path, fileData);
-            previewContainer.innerHTML = '';
-            addFilePreview(previewContainer, fileData, path, -1, false);
-          }
-        };
-        reader.readAsDataURL(file);
+        processFile(file, path, multiple, previewContainer);
       });
+      input.value = '';
     });
 
-    // Drag & drop
-    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
-    zone.addEventListener('dragleave', () => { zone.classList.remove('drag-over'); });
-    zone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      zone.classList.remove('drag-over');
-      const dt = e.dataTransfer;
-      if (dt.files.length) {
-        input.files = dt.files;
-        input.dispatchEvent(new Event('change'));
-      }
+    // ── zone click → 触发 input 点击 ──
+    zone.addEventListener('click', () => {
+      input.click();
     });
 
-    zone.appendChild(input);
-    container.appendChild(zone);
-    container.appendChild(previewContainer);
-
-    // ── Ctrl+V paste support ──
-    zone.addEventListener('paste', (e) => {
+    // ── Ctrl+V paste ──
+    function handlePaste(e) {
+      if (!container.contains(document.activeElement)) return;
       const items = e.clipboardData?.items;
       if (!items) return;
       for (const item of items) {
@@ -240,7 +213,6 @@ const FormRenderer = (function() {
           e.preventDefault();
           const blob = item.getAsFile();
           if (!blob) continue;
-          // generate a filename
           const ext = item.type.split('/')[1] || 'png';
           const name = 'paste-' + Date.now() + '.' + ext;
           const reader = new FileReader();
@@ -261,8 +233,50 @@ const FormRenderer = (function() {
           return;
         }
       }
+    }
+
+    zone.addEventListener('paste', handlePaste);
+
+    // Drag & drop
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => { zone.classList.remove('drag-over'); });
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const dt = e.dataTransfer;
+      if (dt.files.length) {
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change'));
+      }
     });
+
+    zone.appendChild(input);
+    container.appendChild(zone);
+    container.appendChild(previewContainer);
     return container;
+  }
+
+  function processFile(file, path, multiple, previewContainer) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const fileData = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        dataURL: ev.target.result
+      };
+      if (multiple) {
+        const arr = FormState.getState(path) || [];
+        const newArr = Array.isArray(arr) ? [...arr, fileData] : [fileData];
+        FormState.set(path, newArr);
+        addFilePreview(previewContainer, fileData, path, newArr.length - 1, true);
+      } else {
+        FormState.set(path, fileData);
+        previewContainer.innerHTML = '';
+        addFilePreview(previewContainer, fileData, path, -1, false);
+      }
+    };
+    reader.readAsDataURL(file);
   }
 
   function addFilePreview(container, fileData, path, index, isArray) {
