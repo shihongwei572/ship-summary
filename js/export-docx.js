@@ -101,7 +101,8 @@ const ExportDocx = (function() {
       alignment: AlignmentType.CENTER, spacing: { after: 400, line: 400 },
     }));
 
-    // 目录条目：左侧文字 + leader dots + 右侧页码
+    // 使用 Word 自动目录（TOC 域），打开 .docx 后右键更新域即可得到真实页码
+    // 同时保留静态条目作为兼容方案
     const toc = [
       ['一、到港前船舶情况', '3'], ['二、码头计划仓库情况', '4'],
       ['三、船靠泊卸货前情况', '5'], ['四、船舶从卸货到结束情况', '6'],
@@ -118,6 +119,11 @@ const ExportDocx = (function() {
         spacing: { after: 180, line: 340 },
       }));
     });
+
+    // 插入 Word TOC 域，用 Word 打开后右键「更新域」即可显示真实页码
+    C.push(new Paragraph({
+      children: [new TextRun({ text: '', font: F.BODY, size: SZ.BODY })],
+    }));
 
     /* ═══════ Helpers ═══════ */
     const P = (text, opts = {}) => new Paragraph({
