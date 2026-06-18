@@ -58,15 +58,22 @@ const ExportDocx = (function() {
 
     /* ═══════ 目录 ═══════ */
     C.push(new Paragraph({ children: [new PageBreak()] }));
-    C.push(new Paragraph({ children: [new TextRun({ text: '目录', font: F.TOC, size: SZ.TOC_TITLE })], alignment: AlignmentType.CENTER, spacing: { after: 300, line: 400 } }));
+    C.push(new Paragraph({ children: [new TextRun({ text: '目录', font: F.TOC, size: SZ.TOC_TITLE })], alignment: AlignmentType.CENTER, spacing: { after: 200, line: 400 } }));
 
-    // 插入真实 TOC 域！用 Word 打开后右键 → 更新域 即可显示真实页码
+    // 提示用户更新目录
+    C.push(new Paragraph({
+      children: [new TextRun({ text: '💡 请在Word中右键目录 → "更新域" → "只更新页码"，即可显示正确页码', font: F.BODY, size: 20, color: '666666' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 300 },
+    }));
+
+    // 插入动态TOC域（支持后续自动更新页码）
     C.push(new TableOfContents('目录', {
       hyperlink: true,
       headingStyleRange: '1-1',
     }));
 
-    // 用 headingLevel 标记板块标题，TOC 会自动抓取
+    // 章节标题样式（保留Heading样式便于后续手动生成目录）
     const H = text => new Paragraph({
       heading: HeadingLevel.HEADING_1,
       children: [new TextRun({ text, font: F.H, size: SZ.SEC_H, bold: true })],
