@@ -28,6 +28,21 @@
     updateAllStatusIndicators();
     FormState.onChange(() => updateAllStatusIndicators());
 
+    // Auto-update Section7 summary fields in UI when state changes
+    FormState.onChange((path, state) => {
+      if (path && (path.startsWith('section1.') || path.startsWith('section2.') || 
+          path.startsWith('section4.') || path.startsWith('section5.') || 
+          path.startsWith('meta.'))) {
+        setTimeout(() => {
+          ['section7.operationsOverview', 'section7.qualityControl',
+           'section7.safetyProcess', 'section7.improvements'].forEach(p => {
+            const el = document.querySelector('[data-path="' + p + '"]');
+            if (el) { el.value = FormState.getState(p) || ''; }
+          });
+        }, 30);
+      }
+    });
+
     // Check for saved draft
     checkForDraft();
 

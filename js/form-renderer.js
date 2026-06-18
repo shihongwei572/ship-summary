@@ -81,7 +81,7 @@ const FormRenderer = (function() {
     return div;
   }
 
-  function makeInput(path, type, placeholder, cssClass) {
+  function makeInput(path, type, placeholder, cssClass, readonly) {
     const input = document.createElement(type === 'textarea' ? 'textarea' : 'input');
     if (type === 'textarea') {
       input.className = 'form-textarea';
@@ -95,9 +95,16 @@ const FormRenderer = (function() {
     if (val !== null && val !== undefined && val !== false) {
       input.value = val;
     }
-    input.addEventListener('input', () => {
-      FormState.set(path, type === 'number' ? input.value : input.value);
-    });
+    if (readonly) {
+      input.readOnly = true;
+      input.style.backgroundColor = '#f5f5f5';
+      input.style.color = '#666';
+      input.style.cursor = 'not-allowed';
+    } else {
+      input.addEventListener('input', () => {
+        FormState.set(path, type === 'number' ? input.value : input.value);
+      });
+    }
     input.setAttribute('data-path', path);
     return input;
   }
@@ -722,12 +729,12 @@ const FormRenderer = (function() {
     const uHrs = document.createElement('div');
     uHrs.className = 'form-group fixed';
     uHrs.innerHTML = '<label class="form-label">共计小时 <span style="color:#999;font-weight:400">(自动计算)</span></label>';
-    uHrs.appendChild(makeInput('section4.unloading.totalHours', 'text', '如：30.75'));
+    uHrs.appendChild(makeInput('section4.unloading.totalHours', 'text', '如：30.75', '', true));
     rowUnload2.appendChild(uHrs);
     const uDaily = document.createElement('div');
     uDaily.className = 'form-group fixed';
     uDaily.innerHTML = '<label class="form-label">日均卸货量 <span style="color:#999;font-weight:400">(万吨,自动计算)</span></label>';
-    uDaily.appendChild(makeInput('section4.unloading.dailyAverage', 'text', '如：1.6'));
+    uDaily.appendChild(makeInput('section4.unloading.dailyAverage', 'text', '如：1.6', '', true));
     rowUnload2.appendChild(uDaily);
     fgUnload.appendChild(rowUnload2);
 
@@ -808,12 +815,12 @@ const FormRenderer = (function() {
     const lQty = document.createElement('div');
     lQty.className = 'form-group';
     lQty.innerHTML = '<label class="form-label">实际损耗量（吨） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    lQty.appendChild(makeInput('section4.loss.quantity', 'text', '装运-卸船'));
+    lQty.appendChild(makeInput('section4.loss.quantity', 'text', '装运-卸船', '', true));
     rowLoss.appendChild(lQty);
     const lRate = document.createElement('div');
     lRate.className = 'form-group';
     lRate.innerHTML = '<label class="form-label">损耗率（%） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    lRate.appendChild(makeInput('section4.loss.rate', 'text', '损耗量/装运量×100'));
+    lRate.appendChild(makeInput('section4.loss.rate', 'text', '损耗量/装运量×100', '', true));
     rowLoss.appendChild(lRate);
     const lStd = document.createElement('div');
     lStd.className = 'form-group';
@@ -905,7 +912,7 @@ const FormRenderer = (function() {
     const puDays = document.createElement('div');
     puDays.className = 'form-group fixed';
     puDays.innerHTML = '<label class="form-label">共计天数 <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    puDays.appendChild(makeInput('section5.pickup.totalDays', 'number', '如：65'));
+    puDays.appendChild(makeInput('section5.pickup.totalDays', 'text', '如：65', '', true));
     rowPickup2.appendChild(puDays);
     const puQty = document.createElement('div');
     puQty.className = 'form-group';
@@ -923,7 +930,7 @@ const FormRenderer = (function() {
     const olr = document.createElement('div');
     olr.className = 'form-group fixed';
     olr.innerHTML = '<label class="form-label">出库损耗率（%） <span style="color:#999;font-weight:400">(自动计算)</span></label>';
-    olr.appendChild(makeInput('section5.pickup.outboundLossRate', 'text', '如：0.04'));
+    olr.appendChild(makeInput('section5.pickup.outboundLossRate', 'text', '如：0.04', '', true));
     rowPickup3.appendChild(olr);
     fgPickup.appendChild(rowPickup3);
     fgPickup.appendChild(makeInput('section5.pickup.outboundLossReason', 'text', '损耗原因'));
@@ -1023,7 +1030,7 @@ const FormRenderer = (function() {
     const totalDiv = document.createElement('div');
     totalDiv.className = 'form-group';
     totalDiv.innerHTML = '<label class="form-label">港口费用合计（元） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    totalDiv.appendChild(makeInput('section6.southernPortFees.totalPortFee', 'text', '港口作业+堆存+其他'));
+    totalDiv.appendChild(makeInput('section6.southernPortFees.totalPortFee', 'text', '港口作业+堆存+其他', '', true));
     rowSF0.appendChild(totalDiv);
     fgSouth.appendChild(rowSF0);
     const rowSF2 = document.createElement('div');
@@ -1031,7 +1038,7 @@ const FormRenderer = (function() {
     const ucDiv = document.createElement('div');
     ucDiv.className = 'form-group';
     ucDiv.innerHTML = '<label class="form-label">折合单吨成本（元/吨） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    ucDiv.appendChild(makeInput('section6.southernPortFees.unitCost', 'text', '合计/装运吨数'));
+    ucDiv.appendChild(makeInput('section6.southernPortFees.unitCost', 'text', '合计/装运吨数', '', true));
     rowSF2.appendChild(ucDiv);
     const epfDiv = document.createElement('div');
     epfDiv.className = 'form-group';
@@ -1044,12 +1051,12 @@ const FormRenderer = (function() {
     const devDiv = document.createElement('div');
     devDiv.className = 'form-group';
     devDiv.innerHTML = '<label class="form-label">费用偏差（元） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    devDiv.appendChild(makeInput('section6.southernPortFees.deviation', 'text', '合计-预估×吨数'));
+    devDiv.appendChild(makeInput('section6.southernPortFees.deviation', 'text', '合计-预估×吨数', '', true));
     rowSF3.appendChild(devDiv);
     const udDiv = document.createElement('div');
     udDiv.className = 'form-group';
     udDiv.innerHTML = '<label class="form-label">单吨偏差（元/吨） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
-    udDiv.appendChild(makeInput('section6.southernPortFees.unitDeviation', 'text', '单吨成本-预估'));
+    udDiv.appendChild(makeInput('section6.southernPortFees.unitDeviation', 'text', '单吨成本-预估', '', true));
     rowSF3.appendChild(udDiv);
     fgSouth.appendChild(rowSF3);
     body.appendChild(fgSouth);
@@ -1192,52 +1199,16 @@ const FormRenderer = (function() {
 
   // ── Auto-generate Section 7 Summary ──
   function generateSummary() {
-    const s = FormState.getState();
-    const m = s.meta;
-    const ship = (m.shipName || '________') + '/' + (m.voyage || '________');
-    const cargoQty = s.section1.cargoQuantity || '____';
-    const unloadedQty = s.section4.unloadedQuantity || '____';
-    const pickupQty = s.section5.pickup.cumulativeQuantity || '____';
-    const lossQty = s.section4.loss.quantity || '____';
-    const lossRate = s.section4.loss.rate || '____';
-    const contractStd = s.section4.loss.contractStandard || '____';
-    const unloadingDays = (s.section4.unloading.totalHours ? (parseFloat(s.section4.unloading.totalHours)/24).toFixed(1) : '____');
-    const pickupDays = s.section5.pickup.totalDays || '____';
-    const isClaimed = s.section4.insurance.claimed;
-    const dockName = s.section2.dockName || '____';
-    const berth = s.section2.berthNumber || '____';
-    const portOfLoading = s.section1.portOfLoading || '____';
-
-    const overview = '本次航次' + ship + '货物总数量' + cargoQty + '吨，实际卸货' + unloadedQty +
-      '吨、提货' + pickupQty + '吨，损耗' + lossQty + '吨（损耗率' + lossRate +
-      '%），均符合合同约定（≤' + contractStd + '%）及相关标准；船舶航行轨迹可追溯、无异常，' +
-      '靠泊泊位（' + berth + '）、码头仓位安排合理，卸货效率达标（' + unloadingDays +
-      '天完成），清仓质量合格。';
-
-    const quality = '货物从装运港至提货结束，全程品质稳定，检验、巡查记录完整，无霉变、结块等异常情况，满足提货标准要求。';
-
-    const safety = '全程落实安全风险排查，无安全事故发生；靠泊、卸货、提货各环节流程规范，相关记录、照片、报告等资料完整归档，可随时查询核查；' +
-      (isClaimed ? '本航次发生出险，已按保险流程处理。' : '本航次未出险。');
-
-    const pd = parseFloat(pickupDays);
-    const improvement = '本次作业整体顺利，各环节衔接顺畅；' +
-      (pd > 45 ? '提货周期较长（' + pickupDays + '天），后续需加快提货进度；' : '') +
-      '后续将继续优化作业计划，加强沟通对接，提升作业效率和损耗控制水平。';
-
-    FormState.setMultiple({
-      'section7.operationsOverview': overview,
-      'section7.qualityControl': quality,
-      'section7.safetyProcess': safety,
-      'section7.improvements': improvement,
-    });
+    // 触发 FormState 重新计算（会自动更新section7）
+    FormState.set('section7._trigger', String(Date.now()));
 
     setTimeout(() => {
       ['section7.operationsOverview', 'section7.qualityControl',
        'section7.safetyProcess', 'section7.improvements'].forEach(path => {
         const el = document.querySelector('[data-path="' + path + '"]');
-        if (el) { el.value = FormState.getState(path) || ''; el.dispatchEvent(new Event('input', { bubbles: true })); }
+        if (el) { el.value = FormState.getState(path) || ''; }
       });
-    }, 100);
+    }, 50);
   }
 
   // ── Public API ──────────────────────────────────────────

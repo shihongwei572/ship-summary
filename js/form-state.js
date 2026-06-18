@@ -16,7 +16,7 @@ const FormState = (function() {
 
     section1: {
       // 水路运单
-      waterwayWaybillText: '',
+      waterwayWaybillText: '运单信息与货物、船名航次一致，货权清晰',
       waterwayWaybillFile: null,  // { name, size, dataURL }
       // 装运港、数量及时间
       portOfLoading: '',
@@ -24,7 +24,7 @@ const FormState = (function() {
       loadingStartTime: '',
       loadingEndTime: '',
       // 检验报告及封签
-      inspectionReportText: '',
+      inspectionReportText: '装港检验报告显示货物品质符合标准，船舱封签完好，无异常',
       inspectionReportFile: null,
       sealCheckFile: null,        // 封签检查附图
       // 预计到港时间
@@ -33,22 +33,22 @@ const FormState = (function() {
       // 轨迹
       plannedRoute: '',           // 预定航线
       actualRoute: '',            // 实际航线
-      routeDeviation: '无',       // 是否偏离路线
-      trackingDevice: '',         // 轨迹记录设备/单位
-      routeNotes: ''              // 航行备注(天气/事故等)
+      routeDeviation: '无偏离预定航线、无违规停靠',
+      trackingDevice: 'AIS系统',  // 轨迹记录设备/单位
+      routeNotes: '航行期间无恶劣天气、无海上事故，船舶运行正常'
     },
 
     section2: {
       dockName: '',               // 靠泊码头名称
       berthNumber: '',            // 泊位号
-      equipmentStatus: '运行正常', //
+      equipmentStatus: '运行正常',
       warehousePositions: '',     // 仓位编号
       warehouseCapacity: '',      // 仓位容量(万吨)
       cargoWeight: '',            // 货物吨数(万吨)
-      storageConditions: '',      // 存储条件(默认已填模板文字)
+      storageConditions: '仓位地面平整、干燥、无积水、无杂物，通风、防潮、防鼠设施完善，符合玉米存储要求；仓位已提前清理、消毒，经检查合格后预留使用',
       isDirectPickup: false,      // 是否直提
       directPickupStartTime: '',  // 直提开始时间
-      directPickupNotes: ''       // 直提备注
+      directPickupNotes: '直提作业有序，车辆调度合理，无混货、错发现象'
     },
 
     section3: {
@@ -62,9 +62,9 @@ const FormState = (function() {
         fog: false,                // 雾
         noRainThunder: true       // 无降雨雷电
       },
-      windLevel: '',              // 风力级数
-      windDirection: '',          // 风向
-      windStandard: '',           // 风力作业标准(≤X级)
+      windLevel: '4',             // 风力级数
+      windDirection: '南风',      // 风向
+      windStandard: '6',          // 风力作业标准(≤X级)
       // 风险排查
       riskCheck: {
         hasRisk: false,           // false=无异常风险, true=存在风险
@@ -76,7 +76,7 @@ const FormState = (function() {
       safetyOfficer: '',          // 安全责任人
       // 开舱照片
       hatchPhotos: {
-        count: '',
+        count: '4',
         time: '',
         location: '船舶各货舱舱口',
         photographer: '',
@@ -85,7 +85,7 @@ const FormState = (function() {
       },
       // 取样照片
       samplingPhotos: {
-        count: '',
+        count: '4',
         time: '',
         sampler: '',              // 取样人员
         notes: '取样规范、点位覆盖各货舱，样品妥善封存用于后续复检',
@@ -96,8 +96,8 @@ const FormState = (function() {
     section4: {
       // 码头作业线
       operatingLines: {
-        lineCount: '',
-        dailyCapacityPerLine: ''  // 吨/日/条
+        lineCount: '3',
+        dailyCapacityPerLine: '5500'  // 吨/日/条
       },
       // 卸货天数
       unloading: {
@@ -120,8 +120,8 @@ const FormState = (function() {
       loss: {
         quantity: '',             // 实际损耗量(吨)（自动计算）
         rate: '',                 // 损耗率(%)（自动计算）
-        contractStandard: '',     // 合同约定损耗标准
-        reason: ''                // 损耗原因
+        contractStandard: '0.2',  // 合同约定损耗标准
+        reason: '货物自然挥发、装卸正常损耗'
       },
       // 保险
       insurance: {
@@ -135,9 +135,9 @@ const FormState = (function() {
     section5: {
       // 粮质巡查
       qualityPatrol: {
-        frequency: '',            // 巡查频次
+        frequency: '每周2次',     // 巡查频次
         content: '货物有无霉变、结块、发热、虫蛀等异常，仓库通风、防潮设施运行情况',
-        results: '全程无异常，货物品质保持稳定，符合提货标准；巡查记录完整'               // 巡查结果
+        results: '全程无异常，货物品质保持稳定，符合提货标准；巡查记录完整'
       },
       // 提货情况
       pickup: {
@@ -147,7 +147,7 @@ const FormState = (function() {
         cumulativeQuantity: '',   // 累计提货量
         outboundLossQuantity: '', // 出库损耗量
         outboundLossRate: '',     // 出库损耗率（自动计算）
-        outboundLossReason: '货物自然挥发'    // 损耗原因
+        outboundLossReason: '货物自然挥发'
       },
       // 执行商扣
       vendorDeductions: {
@@ -165,7 +165,7 @@ const FormState = (function() {
       southernPortFees: {
         portOperationFee: '',     // 港口作业费
         storageFee: '',           // 堆存费
-        otherFees: '',            // 其他杂费
+        otherFees: '0',           // 其他杂费
         unitCost: '',             // 折合单吨成本（自动计算）
         estimatedPortFee: '',     // 销售时预估港口费用
         totalPortFee: '',         // 港口费用合计（自动计算）
@@ -177,10 +177,10 @@ const FormState = (function() {
     },
 
     section7: {
-      operationsOverview: '',     // 作业概况
-      qualityControl: '',         // 品质管控
-      safetyProcess: '',          // 安全及流程
-      improvements: ''            // 不足及改进
+      operationsOverview: '',     // 作业概况（自动生成）
+      qualityControl: '',         // 品质管控（自动生成）
+      safetyProcess: '',          // 安全及流程（自动生成）
+      improvements: ''            // 不足及改进（自动生成）
     },
 
     footer: {
@@ -274,6 +274,47 @@ const FormState = (function() {
       s6.southernPortFees.deviation = (totalPortFee - estTotal).toFixed(2);
       s6.southernPortFees.unitDeviation = ((totalPortFee / loadingQty) - estPortFee).toFixed(2);
     }
+
+    // ── 整船总结 自动生成 ──
+    autoGenerateSummary(state);
+  }
+
+  function autoGenerateSummary(state) {
+    const m = state.meta;
+    const s1 = state.section1;
+    const s2 = state.section2;
+    const s4 = state.section4;
+    const s5 = state.section5;
+    const s6 = state.section6;
+
+    const ship = (m.shipName || '________') + '/' + (m.voyage || '________');
+    const cargoQty = s1.cargoQuantity || '____';
+    const unloadedQty = s4.unloadedQuantity || '____';
+    const pickupQty = s5.pickup.cumulativeQuantity || '____';
+    const lossQty = s4.loss.quantity || '____';
+    const lossRate = s4.loss.rate || '____';
+    const contractStd = s4.loss.contractStandard || '____';
+    const unloadingDays = (s4.unloading.totalHours ? (parseFloat(s4.unloading.totalHours) / 24).toFixed(1) : '____');
+    const pickupDays = s5.pickup.totalDays || '____';
+    const isClaimed = s4.insurance.claimed;
+    const dockName = s2.dockName || '____';
+    const berth = s2.berthNumber || '____';
+
+    state.section7.operationsOverview = '本次航次' + ship + '货物总数量' + cargoQty + '吨，实际卸货' + unloadedQty +
+      '吨、提货' + pickupQty + '吨，损耗' + lossQty + '吨（损耗率' + lossRate +
+      '%），均符合合同约定（≤' + contractStd + '%）及相关标准；船舶航行轨迹可追溯、无异常，' +
+      '靠泊泊位（' + berth + '）、码头仓位安排合理，卸货效率达标（' + unloadingDays +
+      '天完成），清仓质量合格。';
+
+    state.section7.qualityControl = '货物从装运港至提货结束，全程品质稳定，检验、巡查记录完整，无霉变、结块等异常情况，满足提货标准要求。';
+
+    state.section7.safetyProcess = '全程落实安全风险排查，无安全事故发生；靠泊、卸货、提货各环节流程规范，相关记录、照片、报告等资料完整归档，可随时查询核查；' +
+      (isClaimed ? '本航次发生出险，已按保险流程处理。' : '本航次未出险。');
+
+    const pd = parseFloat(pickupDays);
+    state.section7.improvements = '本次作业整体顺利，各环节衔接顺畅；' +
+      (pd > 45 ? '提货周期较长（' + pickupDays + '天），后续需加快提货进度；' : '') +
+      '后续将继续优化作业计划，加强沟通对接，提升作业效率和损耗控制水平。';
   }
 
   // ── Public API ──────────────────────────────────────────
