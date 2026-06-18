@@ -57,6 +57,9 @@ const FormState = (function() {
         sunny: true,
         cloudy: false,
         overcast: false,
+        rain: false,               // 下雨
+        snow: false,               // 下雪
+        fog: false,                // 雾
         noRainThunder: true       // 无降雨雷电
       },
       windLevel: '',              // 风力级数
@@ -100,20 +103,23 @@ const FormState = (function() {
       unloading: {
         startTime: '',
         endTime: '',
-        totalHours: '',           // 共计小时
-        dailyAverage: '',          // 日均卸货量
+        totalHours: '',           // 共计小时（自动计算）
+        dailyAverage: '',          // 日均卸货量（自动计算）
         hasPause: false,          // 是否暂停
         pauseReason: '',
         pauseDuration: ''
       },
+      // 卸货数量（用于计算损耗率）
+      unloadedQuantity: '',       // 卸船数量(吨)
+      loadingQuantity: '',        // 装运数量(吨) — reuse section1.cargoQuantity
       // 船舱清仓
       holdCleaningResult: '各货舱舱壁、舱底无残留货物、无杂物、无积水，清仓干净度符合相关标准',
       // 品质情况
       qualityInspectionResult: '货物品质与装运港检验报告一致，无霉变、结块、杂质超标、发热等异常，符合合同约定及相关标准',
       // 损耗情况
       loss: {
-        quantity: '',             // 实际损耗量(吨)
-        rate: '',                 // 损耗率(%)
+        quantity: '',             // 实际损耗量(吨)（自动计算）
+        rate: '',                 // 损耗率(%)（自动计算）
         contractStandard: '',     // 合同约定损耗标准
         reason: ''                // 损耗原因
       },
@@ -131,17 +137,17 @@ const FormState = (function() {
       qualityPatrol: {
         frequency: '',            // 巡查频次
         content: '货物有无霉变、结块、发热、虫蛀等异常，仓库通风、防潮设施运行情况',
-        results: ''               // 巡查结果
+        results: '全程无异常，货物品质保持稳定，符合提货标准；巡查记录完整'               // 巡查结果
       },
       // 提货情况
       pickup: {
         startTime: '',
         endTime: '',
-        totalDays: '',
+        totalDays: '',             // 共计天数（自动计算）
         cumulativeQuantity: '',   // 累计提货量
         outboundLossQuantity: '', // 出库损耗量
-        outboundLossRate: '',     // 出库损耗率
-        outboundLossReason: ''    // 损耗原因
+        outboundLossRate: '',     // 出库损耗率（自动计算）
+        outboundLossReason: '货物自然挥发'    // 损耗原因
       },
       // 执行商扣
       vendorDeductions: {
@@ -160,10 +166,11 @@ const FormState = (function() {
         portOperationFee: '',     // 港口作业费
         storageFee: '',           // 堆存费
         otherFees: '',            // 其他杂费
-        unitCost: '',             // 折合单吨成本
+        unitCost: '',             // 折合单吨成本（自动计算）
         estimatedPortFee: '',     // 销售时预估港口费用
-        deviation: '',            // 费用偏差
-        unitDeviation: ''         // 单吨偏差
+        totalPortFee: '',         // 港口费用合计（自动计算）
+        deviation: '',            // 费用偏差（自动计算）
+        unitDeviation: ''         // 单吨偏差（自动计算）
       },
       shippingCostPerTon: '',     // 海运费(元/吨)
       profitAnalysis: ''          // 利润分析
@@ -193,9 +200,80 @@ const FormState = (function() {
   }
 
   function notifyListeners(changedPath) {
+    // Run auto-calculations before notifying
+    recalculateAutoFields();
     listeners.forEach(fn => {
       try { fn(changedPath, state); } catch(e) { console.error('Listener error:', e); }
     });
+  }
+
+  // ── Auto-calculations ──────────────────────────────────
+  function recalculateAutoFields() {
+    const s1 = state.section1;
+    const s4 = state.section4;
+    const s5 = state.section5;
+    const s6 = state.section6;
+
+    // ── 卸货时间 自动计算 ──
+    if (s4.unloading.startTime && s4.unloading.endTime) {
+      const start = new Date(s4.unloading.startTime);
+      const end = new Date(s4.unloading.endTime);
+      if (!isNaN(start) && !isNaN(end) && end > start) {
+        const hours = (end - start) / 3600000;
+        s4.unloading.totalHours = hours.toFixed(1);
+        const days = hours / 24;
+        // 日均卸货量 = 装运数量 / 天数
+        const cargoQty = parseFloat(s1.cargoQuantity) || 0;
+        if (cargoQty > 0 && days > 0) {
+          s4.unloading.dailyAverage = (cargoQty / 10000 / days).toFixed(2); // 万吨
+        }
+      }
+    }
+
+    // ── 卸船损耗 自动计算 ──
+    const loadingQty = parseFloat(s1.cargoQuantity) || 0;
+    const unloadedQty = parseFloat(s4.unloadedQuantity) || 0;
+    if (loadingQty > 0 && unloadedQty > 0) {
+      const lossQty = loadingQty - unloadedQty;
+      s4.loss.quantity = lossQty.toFixed(2);
+      const lossRate = (lossQty / loadingQty) * 100;
+      s4.loss.rate = lossRate.toFixed(4);
+    }
+
+    // ── 出库损耗率 自动计算 ──
+    const cumulativeQty = parseFloat(s5.pickup.cumulativeQuantity) || 0;
+    const outLossQty = parseFloat(s5.pickup.outboundLossQuantity) || 0;
+    if (cumulativeQty > 0 && outLossQty > 0) {
+      const outLossRate = (outLossQty / cumulativeQty) * 100;
+      s5.pickup.outboundLossRate = outLossRate.toFixed(4);
+    }
+
+    // ── 提货天数 自动计算 ──
+    if (s5.pickup.startTime && s5.pickup.endTime) {
+      const ps = new Date(s5.pickup.startTime);
+      const pe = new Date(s5.pickup.endTime);
+      if (!isNaN(ps) && !isNaN(pe) && pe > ps) {
+        s5.pickup.totalDays = Math.ceil((pe - ps) / 86400000);
+      }
+    }
+
+    // ── 港口费用 自动计算 ──
+    const portOpFee = parseFloat(s6.southernPortFees.portOperationFee) || 0;
+    const storageFee = parseFloat(s6.southernPortFees.storageFee) || 0;
+    const otherFees = parseFloat(s6.southernPortFees.otherFees) || 0;
+    const totalPortFee = portOpFee + storageFee + otherFees;
+    if (totalPortFee > 0) {
+      s6.southernPortFees.totalPortFee = totalPortFee.toFixed(2);
+      if (loadingQty > 0) {
+        s6.southernPortFees.unitCost = (totalPortFee / loadingQty).toFixed(2);
+      }
+    }
+    const estPortFee = parseFloat(s6.southernPortFees.estimatedPortFee) || 0;
+    if (estPortFee > 0 && loadingQty > 0) {
+      const estTotal = estPortFee * loadingQty;
+      s6.southernPortFees.deviation = (totalPortFee - estTotal).toFixed(2);
+      s6.southernPortFees.unitDeviation = ((totalPortFee / loadingQty) - estPortFee).toFixed(2);
+    }
   }
 
   // ── Public API ──────────────────────────────────────────

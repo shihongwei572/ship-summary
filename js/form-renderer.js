@@ -562,6 +562,9 @@ const FormRenderer = (function() {
       { value: 'sunny', label: '晴天' },
       { value: 'cloudy', label: '阴天' },
       { value: 'overcast', label: '多云' },
+      { value: 'rain', label: '下雨' },
+      { value: 'snow', label: '下雪' },
+      { value: 'fog', label: '雾' },
       { value: 'noRainThunder', label: '无降雨雷电' }
     ]));
     const rowWind = document.createElement('div');
@@ -718,12 +721,12 @@ const FormRenderer = (function() {
     rowUnload2.className = 'field-row';
     const uHrs = document.createElement('div');
     uHrs.className = 'form-group fixed';
-    uHrs.innerHTML = '<label class="form-label">共计小时</label>';
+    uHrs.innerHTML = '<label class="form-label">共计小时 <span style="color:#999;font-weight:400">(自动计算)</span></label>';
     uHrs.appendChild(makeInput('section4.unloading.totalHours', 'text', '如：30.75'));
     rowUnload2.appendChild(uHrs);
     const uDaily = document.createElement('div');
     uDaily.className = 'form-group fixed';
-    uDaily.innerHTML = '<label class="form-label">日均卸货量（万吨）</label>';
+    uDaily.innerHTML = '<label class="form-label">日均卸货量 <span style="color:#999;font-weight:400">(万吨,自动计算)</span></label>';
     uDaily.appendChild(makeInput('section4.unloading.dailyAverage', 'text', '如：1.6'));
     rowUnload2.appendChild(uDaily);
     fgUnload.appendChild(rowUnload2);
@@ -779,19 +782,38 @@ const FormRenderer = (function() {
     fgQuality.appendChild(makeInput('section4.qualityInspectionResult', 'textarea', '品质检验结果...'));
     body.appendChild(fgQuality);
 
-    // 损耗情况
+    // 损耗情况 — now with auto-calc from section1.cargoQuantity + section4.unloadedQuantity
     const fgLoss = makeFormGroup('损耗情况', true);
+
+    // 装运数量（复用 section1）
+    const rowLoss0 = document.createElement('div');
+    rowLoss0.className = 'field-row';
+    const loadQtyDiv = document.createElement('div');
+    loadQtyDiv.className = 'form-group fixed';
+    loadQtyDiv.innerHTML = '<label class="form-label">装运数量（吨）</label>';
+    const loadQtyInput = makeInput('section1.cargoQuantity', 'number', '装运数量');
+    loadQtyInput.setAttribute('data-path', 'section1.cargoQuantity');
+    loadQtyDiv.appendChild(loadQtyInput);
+    rowLoss0.appendChild(loadQtyDiv);
+
+    const unloadQtyDiv = document.createElement('div');
+    unloadQtyDiv.className = 'form-group fixed';
+    unloadQtyDiv.innerHTML = '<label class="form-label">卸船数量（吨）</label>';
+    unloadQtyDiv.appendChild(makeInput('section4.unloadedQuantity', 'number', '卸船实际数量'));
+    rowLoss0.appendChild(unloadQtyDiv);
+    fgLoss.appendChild(rowLoss0);
+
     const rowLoss = document.createElement('div');
     rowLoss.className = 'field-row';
     const lQty = document.createElement('div');
     lQty.className = 'form-group';
-    lQty.innerHTML = '<label class="form-label">实际损耗量（吨）</label>';
-    lQty.appendChild(makeInput('section4.loss.quantity', 'number', '如：10.3'));
+    lQty.innerHTML = '<label class="form-label">实际损耗量（吨） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
+    lQty.appendChild(makeInput('section4.loss.quantity', 'text', '装运-卸船'));
     rowLoss.appendChild(lQty);
     const lRate = document.createElement('div');
     lRate.className = 'form-group';
-    lRate.innerHTML = '<label class="form-label">损耗率（%）</label>';
-    lRate.appendChild(makeInput('section4.loss.rate', 'text', '如：0.05'));
+    lRate.innerHTML = '<label class="form-label">损耗率（%） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
+    lRate.appendChild(makeInput('section4.loss.rate', 'text', '损耗量/装运量×100'));
     rowLoss.appendChild(lRate);
     const lStd = document.createElement('div');
     lStd.className = 'form-group';
@@ -882,7 +904,7 @@ const FormRenderer = (function() {
     rowPickup2.className = 'field-row';
     const puDays = document.createElement('div');
     puDays.className = 'form-group fixed';
-    puDays.innerHTML = '<label class="form-label">共计天数</label>';
+    puDays.innerHTML = '<label class="form-label">共计天数 <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
     puDays.appendChild(makeInput('section5.pickup.totalDays', 'number', '如：65'));
     rowPickup2.appendChild(puDays);
     const puQty = document.createElement('div');
@@ -900,7 +922,7 @@ const FormRenderer = (function() {
     rowPickup3.appendChild(olq);
     const olr = document.createElement('div');
     olr.className = 'form-group fixed';
-    olr.innerHTML = '<label class="form-label">出库损耗率（%）</label>';
+    olr.innerHTML = '<label class="form-label">出库损耗率（%） <span style="color:#999;font-weight:400">(自动计算)</span></label>';
     olr.appendChild(makeInput('section5.pickup.outboundLossRate', 'text', '如：0.04'));
     rowPickup3.appendChild(olr);
     fgPickup.appendChild(rowPickup3);
@@ -982,8 +1004,8 @@ const FormRenderer = (function() {
     rowSF.className = 'field-row';
     const pofDiv = document.createElement('div');
     pofDiv.className = 'form-group';
-    pofDiv.innerHTML = '<label class="form-label">港口作业费（元/吨或合计元）</label>';
-    pofDiv.appendChild(makeInput('section6.southernPortFees.portOperationFee', 'text', '如：38元/吨'));
+    pofDiv.innerHTML = '<label class="form-label">港口作业费（合计元）</label>';
+    pofDiv.appendChild(makeInput('section6.southernPortFees.portOperationFee', 'text', '如：1238675.80'));
     rowSF.appendChild(pofDiv);
     const sfDiv = document.createElement('div');
     sfDiv.className = 'form-group';
@@ -991,13 +1013,25 @@ const FormRenderer = (function() {
     sfDiv.appendChild(makeInput('section6.southernPortFees.storageFee', 'text', '如：31642.03'));
     rowSF.appendChild(sfDiv);
     fgSouth.appendChild(rowSF);
-    fgSouth.appendChild(makeInput('section6.southernPortFees.otherFees', 'text', '其他杂费'));
+    const rowSF0 = document.createElement('div');
+    rowSF0.className = 'field-row';
+    const othDiv = document.createElement('div');
+    othDiv.className = 'form-group';
+    othDiv.innerHTML = '<label class="form-label">其他杂费（元）</label>';
+    othDiv.appendChild(makeInput('section6.southernPortFees.otherFees', 'text', ''));
+    rowSF0.appendChild(othDiv);
+    const totalDiv = document.createElement('div');
+    totalDiv.className = 'form-group';
+    totalDiv.innerHTML = '<label class="form-label">港口费用合计（元） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
+    totalDiv.appendChild(makeInput('section6.southernPortFees.totalPortFee', 'text', '港口作业+堆存+其他'));
+    rowSF0.appendChild(totalDiv);
+    fgSouth.appendChild(rowSF0);
     const rowSF2 = document.createElement('div');
     rowSF2.className = 'field-row';
     const ucDiv = document.createElement('div');
     ucDiv.className = 'form-group';
-    ucDiv.innerHTML = '<label class="form-label">折合单吨成本（元/吨）</label>';
-    ucDiv.appendChild(makeInput('section6.southernPortFees.unitCost', 'text', ''));
+    ucDiv.innerHTML = '<label class="form-label">折合单吨成本（元/吨） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
+    ucDiv.appendChild(makeInput('section6.southernPortFees.unitCost', 'text', '合计/装运吨数'));
     rowSF2.appendChild(ucDiv);
     const epfDiv = document.createElement('div');
     epfDiv.className = 'form-group';
@@ -1009,13 +1043,13 @@ const FormRenderer = (function() {
     rowSF3.className = 'field-row';
     const devDiv = document.createElement('div');
     devDiv.className = 'form-group';
-    devDiv.innerHTML = '<label class="form-label">费用偏差（元）</label>';
-    devDiv.appendChild(makeInput('section6.southernPortFees.deviation', 'text', ''));
+    devDiv.innerHTML = '<label class="form-label">费用偏差（元） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
+    devDiv.appendChild(makeInput('section6.southernPortFees.deviation', 'text', '合计-预估×吨数'));
     rowSF3.appendChild(devDiv);
     const udDiv = document.createElement('div');
     udDiv.className = 'form-group';
-    udDiv.innerHTML = '<label class="form-label">单吨偏差（元/吨）</label>';
-    udDiv.appendChild(makeInput('section6.southernPortFees.unitDeviation', 'text', ''));
+    udDiv.innerHTML = '<label class="form-label">单吨偏差（元/吨） <span style=\"color:#999;font-weight:400\">(自动计算)</span></label>';
+    udDiv.appendChild(makeInput('section6.southernPortFees.unitDeviation', 'text', '单吨成本-预估'));
     rowSF3.appendChild(udDiv);
     fgSouth.appendChild(rowSF3);
     body.appendChild(fgSouth);
@@ -1032,23 +1066,34 @@ const FormRenderer = (function() {
   }
 
   // ══════════════════════════════════════════════════════════
-  // SECTION 7: 整船总结
+  // SECTION 7: 整船总结 — 自动生成
   // ══════════════════════════════════════════════════════════
   function buildSection7(body) {
+    // 自动生成总结按钮
+    const fgAuto = makeFormGroup('', false);
+    const autoBtn = document.createElement('button');
+    autoBtn.textContent = '🪄 根据上方信息自动生成总结';
+    autoBtn.style.cssText = 'padding:10px 20px;background:#2980b9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-family:inherit;width:100%;';
+    autoBtn.addEventListener('click', () => {
+      generateSummary();
+    });
+    fgAuto.appendChild(autoBtn);
+    body.appendChild(fgAuto);
+
     const fg1 = makeFormGroup('作业概况', true);
-    fg1.appendChild(makeInput('section7.operationsOverview', 'textarea', '货物总数量、实际卸货、提货、损耗等概述...'));
+    fg1.appendChild(makeInput('section7.operationsOverview', 'textarea', '自动生成，也可手动修改...'));
     body.appendChild(fg1);
 
     const fg2 = makeFormGroup('品质管控', false);
-    fg2.appendChild(makeInput('section7.qualityControl', 'textarea', '货物品质稳定性、检验巡查记录等...'));
+    fg2.appendChild(makeInput('section7.qualityControl', 'textarea', '自动生成，也可手动修改...'));
     body.appendChild(fg2);
 
     const fg3 = makeFormGroup('安全及流程', false);
-    fg3.appendChild(makeInput('section7.safetyProcess', 'textarea', '安全风险排查、无安全事故、流程规范等...'));
+    fg3.appendChild(makeInput('section7.safetyProcess', 'textarea', '自动生成，也可手动修改...'));
     body.appendChild(fg3);
 
     const fg4 = makeFormGroup('不足及改进', false);
-    fg4.appendChild(makeInput('section7.improvements', 'textarea', '本次作业存在的不足及后续改进措施...'));
+    fg4.appendChild(makeInput('section7.improvements', 'textarea', '自动生成，也可手动修改...'));
     body.appendChild(fg4);
 
     // Footer signatures
@@ -1144,6 +1189,56 @@ const FormRenderer = (function() {
       }
     }
   });
+
+  // ── Auto-generate Section 7 Summary ──
+  function generateSummary() {
+    const s = FormState.getState();
+    const m = s.meta;
+    const ship = (m.shipName || '________') + '/' + (m.voyage || '________');
+    const cargoQty = s.section1.cargoQuantity || '____';
+    const unloadedQty = s.section4.unloadedQuantity || '____';
+    const pickupQty = s.section5.pickup.cumulativeQuantity || '____';
+    const lossQty = s.section4.loss.quantity || '____';
+    const lossRate = s.section4.loss.rate || '____';
+    const contractStd = s.section4.loss.contractStandard || '____';
+    const unloadingDays = (s.section4.unloading.totalHours ? (parseFloat(s.section4.unloading.totalHours)/24).toFixed(1) : '____');
+    const pickupDays = s.section5.pickup.totalDays || '____';
+    const isClaimed = s.section4.insurance.claimed;
+    const dockName = s.section2.dockName || '____';
+    const berth = s.section2.berthNumber || '____';
+    const portOfLoading = s.section1.portOfLoading || '____';
+
+    const overview = '本次航次' + ship + '货物总数量' + cargoQty + '吨，实际卸货' + unloadedQty +
+      '吨、提货' + pickupQty + '吨，损耗' + lossQty + '吨（损耗率' + lossRate +
+      '%），均符合合同约定（≤' + contractStd + '%）及相关标准；船舶航行轨迹可追溯、无异常，' +
+      '靠泊泊位（' + berth + '）、码头仓位安排合理，卸货效率达标（' + unloadingDays +
+      '天完成），清仓质量合格。';
+
+    const quality = '货物从装运港至提货结束，全程品质稳定，检验、巡查记录完整，无霉变、结块等异常情况，满足提货标准要求。';
+
+    const safety = '全程落实安全风险排查，无安全事故发生；靠泊、卸货、提货各环节流程规范，相关记录、照片、报告等资料完整归档，可随时查询核查；' +
+      (isClaimed ? '本航次发生出险，已按保险流程处理。' : '本航次未出险。');
+
+    const pd = parseFloat(pickupDays);
+    const improvement = '本次作业整体顺利，各环节衔接顺畅；' +
+      (pd > 45 ? '提货周期较长（' + pickupDays + '天），后续需加快提货进度；' : '') +
+      '后续将继续优化作业计划，加强沟通对接，提升作业效率和损耗控制水平。';
+
+    FormState.setMultiple({
+      'section7.operationsOverview': overview,
+      'section7.qualityControl': quality,
+      'section7.safetyProcess': safety,
+      'section7.improvements': improvement,
+    });
+
+    setTimeout(() => {
+      ['section7.operationsOverview', 'section7.qualityControl',
+       'section7.safetyProcess', 'section7.improvements'].forEach(path => {
+        const el = document.querySelector('[data-path="' + path + '"]');
+        if (el) { el.value = FormState.getState(path) || ''; el.dispatchEvent(new Event('input', { bubbles: true })); }
+      });
+    }, 100);
+  }
 
   // ── Public API ──────────────────────────────────────────
   return {
